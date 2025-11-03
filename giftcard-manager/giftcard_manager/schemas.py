@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
+from pydantic.config import ConfigDict
 
 from .enums import Merchant, TransactionType
 
@@ -24,7 +25,11 @@ def decimal_from_cents(cents: int) -> Decimal:
     return (Decimal(cents) / Decimal(100)).quantize(Decimal("0.01"))
 
 
-class GiftCardBase(BaseModel):
+class ORMModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+
+class GiftCardBase(ORMModel):
     code: str | None = Field(default=None, min_length=4, max_length=32)
     merchant: Merchant
     currency: str = Field(default="USD", min_length=3, max_length=3)
@@ -41,13 +46,13 @@ class GiftCardCreate(GiftCardBase):
         return _normalize_amount(value)
 
 
-class GiftCardUpdate(BaseModel):
+class GiftCardUpdate(ORMModel):
     is_active: bool | None = None
     expires_at: datetime | None = None
     extra_data: dict[str, Any] | None = None
 
 
-class GiftCardReload(BaseModel):
+class GiftCardReload(ORMModel):
     amount: Decimal
     note: str | None = None
 
@@ -57,7 +62,7 @@ class GiftCardReload(BaseModel):
         return _normalize_amount(value)
 
 
-class GiftCardRedeem(BaseModel):
+class GiftCardRedeem(ORMModel):
     amount: Decimal
     note: str | None = None
 
@@ -67,9 +72,10 @@ class GiftCardRedeem(BaseModel):
         return _normalize_amount(value)
 
 
-class GiftCardAdjustment(BaseModel):
+class GiftCardAdjustment(ORMModel):
     amount: Decimal
     note: str | None = None
+    operation: Literal["increase", "decrease"]
 
     @field_validator("amount")
     @classmethod
@@ -77,7 +83,7 @@ class GiftCardAdjustment(BaseModel):
         return _normalize_amount(value)
 
 
-class GiftCardTransaction(BaseModel):
+class GiftCardTransaction(ORMModel):
     id: int
     transaction_type: TransactionType
     amount: Decimal
@@ -95,7 +101,7 @@ class GiftCardTransaction(BaseModel):
         )
 
 
-class GiftCard(BaseModel):
+class GiftCard(ORMModel):
     id: int
     code: str
     merchant: Merchant

@@ -1,57 +1,69 @@
 ## Gift Card Manager
 
-This project provides a lightweight REST API for managing gift cards, balances, and transaction history for a small business. It is built with FastAPI and SQLite so you can run it locally without additional infrastructure.
+A desktop application for issuing and tracking gift cards sold for the merchants you support (Amazon, Best Buy, Lowe's, Walmart, and Home Depot). The app stores balances in a local SQLite database and ships with a GUI so you can quickly look up cards, add value, redeem purchases, and review the transaction history.
 
 ### Features
-- Issue new gift cards with optional custom codes and expiration dates
-- Track balances, reloads, and redemptions with transaction history
-- Prevent redemptions on inactive or expired cards and enforce balance checks
-- Simple JSON API ready to connect to point-of-sale systems or admin dashboards
+- Issue cards with custom codes, expiration dates, and notes
+- Reload, redeem, or manually adjust balances with audit history
+- Toggle cards active/inactive to prevent unauthorized use
+- Filter cards by merchant or status and view transaction history at a glance
+- Stores data in a per-user folder so multiple machines stay isolated
 
 ### Getting Started
-1. **Install dependencies**
+1. **Create a virtual environment and install dependencies**
    ```bash
    python -m venv .venv
-   source .venv/bin/activate
+   source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
    pip install -r requirements.txt
    ```
-2. **Run database migrations**
-   The app auto-creates tables on first run using SQLAlchemy metadata.
-3. **Start the server**
+2. **Launch the application**
    ```bash
-   uvicorn app.main:app --reload
+   python main.py
    ```
-4. **Explore the API**
-   Visit `http://127.0.0.1:8000/docs` for interactive Swagger docs.
+   The database is created automatically on first launch in the OS-specific application data directory (see `giftcard_manager/config.py`).
 
-### Running Tests
+### Build a Windows `.exe`
+PyInstaller is included in `requirements.txt` so you can bundle the app after installing dependencies.
+
+```bash
+pyinstaller --noconfirm --noconsole --name GiftCardManager main.py
+```
+
+The packaged executable will be placed in the `dist/GiftCardManager` folder. Copy that folder to your PC and launch `GiftCardManager.exe` whenever you need the tool.
+
+### Testing
+Run the automated tests before distributing a new build:
+
 ```bash
 pytest
 ```
 
-### Environment Variables
-- `DATABASE_URL` (optional): Override the default SQLite database path.
-
-### Project Structure
+### Project Layout
 ```
 giftcard-manager/
-├── app/
+├── giftcard_manager/
 │   ├── __init__.py
+│   ├── config.py
 │   ├── crud.py
 │   ├── database.py
-│   ├── main.py
+│   ├── enums.py
+│   ├── exceptions.py
+│   ├── gui/
+│   │   ├── __init__.py
+│   │   ├── dialogs.py
+│   │   ├── main_window.py
+│   │   └── utils.py
 │   ├── models.py
-│   ├── routers/
-│   │   └── giftcards.py
-│   └── schemas.py
+│   ├── schemas.py
+│   └── services.py
 ├── tests/
-│   ├── __init__.py
-│   └── test_giftcards.py
+│   └── __init__.py
+├── main.py
 ├── requirements.txt
 └── README.md
 ```
 
 ### Next Steps
-- Add authentication and role-based access control
-- Create a lightweight admin dashboard
-- Integrate email notifications for gift card issuance and low balances
+- Add CSV export and import for bulk card management
+- Create scheduled backups of the SQLite database
+- Ship preset reporting for monthly sales and redemption totals
