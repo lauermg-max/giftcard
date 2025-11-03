@@ -8,13 +8,7 @@ from sqlalchemy import Boolean, CheckConstraint, DateTime, Enum, ForeignKey, Int
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
-
-
-class TransactionType(str, enum.Enum):
-    ISSUE = "issue"
-    RELOAD = "reload"
-    REDEEM = "redeem"
-    ADJUSTMENT = "adjustment"
+from .enums import Merchant, TransactionType
 
 
 class GiftCard(Base):
@@ -22,6 +16,7 @@ class GiftCard(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     code: Mapped[str] = mapped_column(String(32), unique=True, index=True)
+    merchant: Mapped[Merchant] = mapped_column(Enum(Merchant, native_enum=False), index=True)
     currency: Mapped[str] = mapped_column(String(3), default="USD")
     initial_balance_cents: Mapped[int] = mapped_column(Integer)
     balance_cents: Mapped[int] = mapped_column(Integer)

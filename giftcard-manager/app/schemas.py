@@ -6,6 +6,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 
+from .enums import Merchant, TransactionType
+
 
 def _normalize_amount(value: Decimal) -> Decimal:
     quantized = value.quantize(Decimal("0.01"))
@@ -24,6 +26,7 @@ def decimal_from_cents(cents: int) -> Decimal:
 
 class GiftCardBase(BaseModel):
     code: str | None = Field(default=None, min_length=4, max_length=32)
+    merchant: Merchant
     currency: str = Field(default="USD", min_length=3, max_length=3)
     expires_at: datetime | None = None
     extra_data: dict[str, Any] | None = None
@@ -76,7 +79,7 @@ class GiftCardAdjustment(BaseModel):
 
 class GiftCardTransaction(BaseModel):
     id: int
-    transaction_type: str
+    transaction_type: TransactionType
     amount: Decimal
     note: str | None
     created_at: datetime
@@ -85,7 +88,7 @@ class GiftCardTransaction(BaseModel):
     def from_orm(cls, transaction: Any) -> "GiftCardTransaction":
         return cls(
             id=transaction.id,
-            transaction_type=transaction.transaction_type.value,
+            transaction_type=transaction.transaction_type,
             amount=decimal_from_cents(transaction.amount_cents),
             note=transaction.note,
             created_at=transaction.created_at,
@@ -95,6 +98,7 @@ class GiftCardTransaction(BaseModel):
 class GiftCard(BaseModel):
     id: int
     code: str
+    merchant: Merchant
     currency: str
     initial_amount: Decimal
     balance: Decimal
@@ -109,6 +113,7 @@ class GiftCard(BaseModel):
         return cls(
             id=gift_card.id,
             code=gift_card.code,
+            merchant=gift_card.merchant,
             currency=gift_card.currency,
             initial_amount=decimal_from_cents(gift_card.initial_balance_cents),
             balance=decimal_from_cents(gift_card.balance_cents),
