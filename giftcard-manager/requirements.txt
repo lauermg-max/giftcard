@@ -1,0 +1,7 @@
+SQLAlchemy==2.0.36
+pydantic==2.9.2
+pydantic-settings==2.6.1
+platformdirs==4.3.2
+PySide6==6.7.3
+PyInstaller==6.11.0
+pytest==8.3.3
